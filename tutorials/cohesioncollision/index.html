@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Cohesion and Collision Experiment - ScaRLib Documentation</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Cohesion and Collision Experiment";
+        var mkdocs_page_input_path = "tutorials/cohesioncollision.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> ScaRLib Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../documentation/">Scaladoc</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Cohesion and Collision Experiment</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#description">Description</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#project-structure">Project Structure</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#preliminaries">Preliminaries</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#how-to-use-it">How to use it</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../followtheleader/">Follow the Leader Experiment</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">ScaRLib Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Tutorials</li>
+      <li class="breadcrumb-item active">Cohesion and Collision Experiment</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="cohesion-and-collision-experiment">Cohesion and Collision Experiment<a class="headerlink" href="#cohesion-and-collision-experiment" title="Permanent link">#</a></h1>
+<h2 id="description">Description<a class="headerlink" href="#description" title="Permanent link">#</a></h2>
+<p>The objective of this experiment is to develop a group of drones that have the ability to move together while avoiding collisions with each other. This is achieved through the implementation of a policy that enables each drone to decide its movement based on the relative position of its neighbors. The experiment is conducted in a 2D environment with unlimited space, where each drone's neighborhood is limited to the five closest neighbors (a hyper-parameter). The drones are capable of moving in eight different directions in a square grid, including horizontal, vertical, and diagonal movements. The environment state is determined by the relative distance between the drones and their closest neighbors, as perceived by the individual drone. By integrating Scafi, we are able to express this concept effectively.</p>
+<pre><code class="language-scala">val state = foldhoodPlus(Seq.empty)(_ ++ _)(Set(nbrVector))
+</code></pre>
+<p>We designed a reward function based on two factors: <em>collision factor</em> and <em>cohesion factor</em>. We aim to learn a policy by which agents, initially spread in a very sparse way in the environment, move toward each other until reaching approximate $\delta$ distance without colliding. Ultimately forming one or many close groups. The collision factor comes into play when the distance is less than $\delta$, and exponentially weights the distance d relative to its closest neighbour: $collision = \exp(-\frac{d}{\delta})$ if $d &lt; \delta$, otherwise $collision = 0$.</p>
+<p>In this way, when the negative factor is taken into account: the system will tend to move nodes away from each other. However, if only this factor were used, the system would be disorganized. This is where the cohesion facator comes in. Given the neighbour with the maximum distance $D$, it linearly adjusts the distance relative to the node being evaluated by function: $cohesion = -(D-\delta)$ if $d &gt; \delta$, otherwise $cohesion = 0$. The overall reward function is defined as the sum of these two factors.</p>
+<h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">#</a></h2>
+<p>All the files needed to describe the experiment are in the <code>src/main/scala/experiments/cohesionandcollision</code> folder. As described in ScaRLib, to run a learning the user must define: 
+- The action space
+- The reward function
+- The state
+- The neural network used to approximate the Q-function
+- The scafi logic
+- The alchemist specification</p>
+<p>Finally, all these elements are merged to create the learning system in the file <code>CohesionCollisionTraining.scala</code>.</p>
+<h2 id="preliminaries">Preliminaries<a class="headerlink" href="#preliminaries" title="Permanent link">#</a></h2>
+<p>Due to the usage of ScalaPy there might be the need for some extra-configuration, all the details can be found <a href="https://scalapy.dev/docs/">here</a> (sections: <code>Execution</code> and <code>Virtualenv</code>). Tip: if if you don't want to configure environment variables on your PC you can pass the required arguments directly to the gradle task adding the following code (in <code>build.gradle.kts</code> file):</p>
+<pre><code class="language-kotlin">jvmArgs(
+    &quot;-Dscalapy.python.library=${pyhtonVersion}&quot;,
+    //Other required parameters...
+)
+</code></pre>
+<p>Before running the learning you must install the following dependencies:</p>
+<pre><code class="language-shell">pip install -r requirements.txt
+</code></pre>
+<h2 id="how-to-use-it">How to use it<a class="headerlink" href="#how-to-use-it" title="Permanent link">#</a></h2>
+<p>In order to launch the learning only one change is needed, you must specify the path on where the snapshots of the policy will be saved. You can do this editing the following line of code in the file <code>CohesionCollisionTraining.scala</code>:</p>
+<pre><code class="language-scala">private val learningConfiguration = new LearningConfiguration(dqnFactory = new NNFactory, snapshotPath = &quot;path-to-snapshot-folder&quot;)
+</code></pre>
+<p>After making this change it is possible to run the learning using a pre-configured Gradle task launching the following command:</p>
+<pre><code class="language-powershell">./gradlew runCohesionCollisionTraining
+</code></pre>
+<p>If you want to see the dynamics of the system during the learning you can use the following command:</p>
+<pre><code class="language-powershell">./gradlew runCohesionCollisionTrainingGui
+</code></pre>
+<p>You can follow the progess of learning using <code>Tensorboard</code> by running the following command:</p>
+<pre><code class="language-powershell">tensorboard --logdir=runs
+</code></pre>
+<p>This could take a while (hours in a modern machine). So we already upload the last network snapshot in the folder <code>network</code>.</p>
+<p>To verify the performance of the policy you can run the following command the <code>evaluation</code> tasks with:</p>
+<pre><code class="language-aidl">./gradlew runCohesionCollisionEvaluation
+</code></pre>
+<p>If you want to see the GUI you can run the following command:</p>
+<pre><code class="language-aidl">./gradlew runCohesionCollisionEvaluationGui
+</code></pre>
+<p>This will produce the data needed to plot the graphs in the <code>data</code> folder. 
+To plot the graphs you can run the following command:</p>
+<pre><code class="language-aidl">python plotter.py
+</code></pre>
+<p>This will create the graphs in the <code>charts</code> folder.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../documentation/" class="btn btn-neutral float-left" title="Scaladoc"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../followtheleader/" class="btn btn-neutral float-right" title="Follow the Leader Experiment">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../documentation/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../followtheleader/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
